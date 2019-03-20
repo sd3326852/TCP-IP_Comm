@@ -36,14 +36,19 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cb_ListenerIP = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.btn_StartListen = new System.Windows.Forms.Button();
             this.cb_ListLoopback = new System.Windows.Forms.CheckBox();
             this.nud_ListenerPort = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.btn_StartListen = new System.Windows.Forms.Button();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.tssl_FileLocation = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tssl_UserLevel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tssl_Time = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_ListenerPort)).BeginInit();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -52,7 +57,7 @@
             this.文件ToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(595, 25);
+            this.menuStrip1.Size = new System.Drawing.Size(1011, 25);
             this.menuStrip1.TabIndex = 3;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -111,10 +116,19 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox1.Location = new System.Drawing.Point(0, 25);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(595, 57);
+            this.groupBox1.Size = new System.Drawing.Size(1011, 57);
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "连接参数";
+            // 
+            // btn_StartListen
+            // 
+            this.btn_StartListen.Location = new System.Drawing.Point(493, 18);
+            this.btn_StartListen.Name = "btn_StartListen";
+            this.btn_StartListen.Size = new System.Drawing.Size(75, 23);
+            this.btn_StartListen.TabIndex = 9;
+            this.btn_StartListen.Text = "连接";
+            this.btn_StartListen.UseVisualStyleBackColor = true;
             // 
             // cb_ListLoopback
             // 
@@ -157,20 +171,45 @@
             this.label1.TabIndex = 5;
             this.label1.Text = "侦听用IP";
             // 
-            // btn_StartListen
+            // statusStrip1
             // 
-            this.btn_StartListen.Location = new System.Drawing.Point(493, 18);
-            this.btn_StartListen.Name = "btn_StartListen";
-            this.btn_StartListen.Size = new System.Drawing.Size(75, 23);
-            this.btn_StartListen.TabIndex = 9;
-            this.btn_StartListen.Text = "连接";
-            this.btn_StartListen.UseVisualStyleBackColor = true;
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tssl_FileLocation,
+            this.tssl_UserLevel,
+            this.tssl_Time});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 467);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(1011, 26);
+            this.statusStrip1.TabIndex = 6;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // tssl_FileLocation
+            // 
+            this.tssl_FileLocation.Name = "tssl_FileLocation";
+            this.tssl_FileLocation.Size = new System.Drawing.Size(716, 21);
+            this.tssl_FileLocation.Spring = true;
+            // 
+            // tssl_UserLevel
+            // 
+            this.tssl_UserLevel.AutoSize = false;
+            this.tssl_UserLevel.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right)));
+            this.tssl_UserLevel.Name = "tssl_UserLevel";
+            this.tssl_UserLevel.Size = new System.Drawing.Size(150, 21);
+            this.tssl_UserLevel.Text = "当前用户：";
+            this.tssl_UserLevel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // tssl_Time
+            // 
+            this.tssl_Time.AutoSize = false;
+            this.tssl_Time.Name = "tssl_Time";
+            this.tssl_Time.Size = new System.Drawing.Size(130, 21);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(595, 386);
+            this.ClientSize = new System.Drawing.Size(1011, 493);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.menuStrip1);
             this.Name = "Form1";
@@ -181,6 +220,8 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_ListenerPort)).EndInit();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -201,6 +242,10 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btn_StartListen;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel tssl_FileLocation;
+        private System.Windows.Forms.ToolStripStatusLabel tssl_UserLevel;
+        private System.Windows.Forms.ToolStripStatusLabel tssl_Time;
     }
 }
 
