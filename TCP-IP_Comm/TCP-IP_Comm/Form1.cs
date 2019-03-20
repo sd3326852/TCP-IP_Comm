@@ -33,7 +33,7 @@ namespace TCP_IP_Comm
             this.cb_ListenerIP.Items.Add(this._LParams.ServerIP);
             this.cb_ListenerIP.SelectedIndex = 0;
             this.nud_ListenerPort.Value = this._LParams.Port;
-            this.cb_ListLoopback.Checked = this._LParams.ListLoopback;
+            this.cb_ListLoopback.Checked = this._LParams.CistLoopback;
 
             this.cb_ListenerIP.TextChanged += this.cb_ListenerIP_TextChanged;
             this.cb_ListenerIP.DropDown += this.cb_ListenerIP_DropDown;
@@ -91,7 +91,7 @@ namespace TCP_IP_Comm
         private void cb_ListLoopback_CheckedChanged(object sender, EventArgs e)
         {
             CheckBox cb = sender as CheckBox;
-            this._LParams.ListLoopback = cb.Checked;
+            this._LParams.CistLoopback = cb.Checked;
             _SaveParam();
         }
 
@@ -160,7 +160,7 @@ namespace TCP_IP_Comm
             System.Net.NetworkInformation.NetworkInterface[] interfaces = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
             foreach (System.Net.NetworkInformation.NetworkInterface inf in interfaces)
             {
-                if (!inf.IsReceiveOnly && inf.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up && inf.SupportsMulticast && (inf.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback || this._LParams.ListLoopback))
+                if (!inf.IsReceiveOnly && inf.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up && inf.SupportsMulticast && (inf.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback || this._LParams.CistLoopback))
                 {
                     System.Net.NetworkInformation.IPInterfaceProperties ipinfo = inf.GetIPProperties();
                     foreach (System.Net.NetworkInformation.UnicastIPAddressInformation addr in ipinfo.UnicastAddresses)
@@ -233,6 +233,6 @@ namespace TCP_IP_Comm
     {
         public string ServerIP;
         public ushort Port;
-        public bool ListLoopback;
+        public bool CistLoopback;
     }
 }
