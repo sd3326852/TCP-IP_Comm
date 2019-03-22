@@ -458,7 +458,7 @@ namespace TCP_IP_Comm
             {
                 case DialogResult.OK:
                     _LevelShift(UserLevel.Supervisor);
-                    this.timer1.Interval = 2 * 1000;
+                    this.timer1.Interval = 10 * 60 * 1000;
                     this.timer1.Start();
                     break;
                 case DialogResult.Cancel:
