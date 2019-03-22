@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -15,7 +16,7 @@ using System.Xml.Serialization;
 
 namespace TCP_IP_Comm
 {
-    public partial class Form1 : Form
+    public partial class DecoderLog : Form
     {
         SocketParam _SParams;
         DecoderParam _DParams;
@@ -24,7 +25,7 @@ namespace TCP_IP_Comm
         UserLevel _CurrentUser = UserLevel.Operator;
         WMI_VALUE _WmiValue = new WMI_VALUE();
 
-        public Form1()
+        public DecoderLog()
         {
             InitializeComponent();
         }
@@ -34,6 +35,8 @@ namespace TCP_IP_Comm
         {
             _LoadSocketParam();
             _LoadDecoderParam();
+
+            _LevelShift(this._CurrentUser);
 
             //TCP参数
             this.cb_LocalIP.Items.Add(this._SParams.LocalIP ?? "");
@@ -47,6 +50,7 @@ namespace TCP_IP_Comm
             this.nud_CountPeriod.Value = this._DParams.CountPeriod;
             this.tb_ValidateString.Text = this._DParams.ValidateString ?? "";
             this.lbl_CurrentCount.Text = this._DParams.CurrentCount.ToString();
+            this.tssl_CSVPath.Text = this._DParams.CSVSavingPath;
 
             this.cb_LocalIP.TextChanged += this.cb_ListenerIP_TextChanged;
             this.cb_LocalIP.DropDown += this.cb_ListenerIP_DropDown;
@@ -76,6 +80,7 @@ namespace TCP_IP_Comm
                     nud_ListenerPort.Enabled = false;
                     tb_RemoteIP.Enabled = false;
                     cb_SocketMode.Enabled = false;
+                    tsmi_CSVPath.Enabled = false;
                     btn.Text = "断开";
                 }
                 catch (Exception ex)
@@ -91,6 +96,7 @@ namespace TCP_IP_Comm
                 nud_ListenerPort.Enabled = true;
                 tb_RemoteIP.Enabled = true;
                 cb_SocketMode.Enabled = true;
+                tsmi_CSVPath.Enabled = true;
                 btn.Text = "连接";
             }
         }
@@ -182,7 +188,7 @@ namespace TCP_IP_Comm
             _WriteCSV(csvPath, DateTime.Now.ToString("HH:mm:ss") + "," + strDecode);
             _UpdateIEIDIoState(1, strDecode == this._DParams.ValidateString, -1);
 
-            this._DParams.CurrentCount += 1;
+            this._DParams.CurrentCount++;
             this.lbl_CurrentCount.Text = this._DParams.CurrentCount.ToString();
             if (this._DParams.CurrentCount >= this._DParams.CountPeriod)
             {
@@ -364,6 +370,18 @@ namespace TCP_IP_Comm
         private void _LevelShift(UserLevel User)
         {
             this._CurrentUser = User;
+            this.tssl_UserLevel.Text = User == UserLevel.Supervisor ? "管理员" : "操作员";
+
+            this.tsmi_ModifyPassword.Enabled = User == UserLevel.Supervisor;
+            this.tb_RemoteIP.Enabled = User == UserLevel.Supervisor;
+            this.tb_ValidateString.Enabled = User == UserLevel.Supervisor;
+            this.nud_ListenerPort.Enabled = User == UserLevel.Supervisor;
+            this.nud_CountPeriod.Enabled = User == UserLevel.Supervisor;
+            this.btn_SetCount.Enabled = User == UserLevel.Supervisor;
+            this.btn_StartListen.Enabled = User == UserLevel.Supervisor;
+            this.cb_LocalIP.Enabled = User == UserLevel.Supervisor;
+            this.cb_SocketMode.Enabled = User == UserLevel.Supervisor;
+            this.cb_ListLoopback.Enabled = User == UserLevel.Supervisor;
         }
         #endregion
 
@@ -422,13 +440,51 @@ namespace TCP_IP_Comm
             _LevelShift(UserLevel.Operator);
         }
 
-        private void 文件保存路径ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void tsmi_CSVPath_Click(object sender, EventArgs e)
         {
             var result = fbd_CSVSave.ShowDialog();
             if (result == DialogResult.OK)
             {
                 this._DParams.CSVSavingPath = fbd_CSVSave.SelectedPath;
                 this._SaveDecoderParam();
+                this.tssl_CSVPath.Text = fbd_CSVSave.SelectedPath;
+            }
+        }
+
+        private void tsmi_Login_Click(object sender, EventArgs e)
+        {
+            DialogResult result = new LoginForm(this._DParams).ShowDialog(this);
+            switch (result)
+            {
+                case DialogResult.OK:
+                    _LevelShift(UserLevel.Supervisor);
+                    this.timer1.Interval = 2 * 1000;
+                    this.timer1.Start();
+                    break;
+                case DialogResult.Cancel:
+                    break;
+                case DialogResult.Yes:
+                    _LevelShift(UserLevel.Operator);
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        private void tsmi_ModifyPassword_Click(object sender, EventArgs e)
+        {
+            PwdModForm pmf = new PwdModForm(this._DParams);
+            DialogResult result = pmf.ShowDialog();
+
+            switch (result)
+            {
+                case DialogResult.OK:
+                    this._DParams.Password = pmf.NewPassword;
+                    this._SaveDecoderParam();
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -443,18 +499,70 @@ namespace TCP_IP_Comm
         public SocketMode SocketMode;
     }
 
-    [Serializable]
     public struct DecoderParam
     {
         public uint CountPeriod;
         public uint CurrentCount;
         public string ValidateString;
         public string CSVSavingPath;
+        public string Password;
     }
 
     enum UserLevel
     {
         Supervisor,
         Operator
+    }
+
+    internal class Encrypt
+    {
+        static Encoding encoding = Encoding.UTF8;
+
+        public static string EncryptDES(string encryptString, string key)
+        {
+            var input = encoding.GetBytes(encryptString);
+            var ouptputData = ProcessDES(input, key, true);
+            var outputStr = Convert.ToBase64String(ouptputData);
+
+            //base64编码中有不能作为文件名的'/'符号，这里把它替换一下，增强适用范围
+            return outputStr.Replace('/', '@');
+        }
+
+        public static string DecryptDES(string decryptString, string key)
+        {
+            decryptString = decryptString.Replace('@', '/');
+
+            var input = Convert.FromBase64String(decryptString);
+            var data = ProcessDES(input, key, false);
+            return encoding.GetString(data);
+        }
+
+
+        private static byte[] ProcessDES(byte[] data, string key, bool isEncrypt)
+        {
+            using (var dCSP = new DESCryptoServiceProvider())
+            {
+                var keyData = Md5(key);
+                var rgbKey = new ArraySegment<byte>(keyData, 0, 8).ToArray();
+                var rgbIV = new ArraySegment<byte>(keyData, 8, 8).ToArray();
+                var dCSPKey = isEncrypt ? dCSP.CreateEncryptor(rgbKey, rgbIV) : dCSP.CreateDecryptor(rgbKey, rgbIV);
+
+                using (var memory = new MemoryStream())
+                using (var cStream = new CryptoStream(memory, dCSPKey, CryptoStreamMode.Write))
+                {
+                    cStream.Write(data, 0, data.Length);
+                    cStream.FlushFinalBlock();
+                    return memory.ToArray();
+                }
+            }
+        }
+
+        public static byte[] Md5(string str)
+        {
+            using (var md5 = MD5.Create())
+            {
+                return md5.ComputeHash(Encoding.UTF8.GetBytes(str));
+            }
+        }
     }
 }

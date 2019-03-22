@@ -1,6 +1,6 @@
 ﻿namespace TCP_IP_Comm
 {
-    partial class Form1
+    partial class DecoderLog
     {
         /// <summary>
         /// 必需的设计器变量。
@@ -30,8 +30,12 @@
         {
             this.components = new System.ComponentModel.Container();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmi_File = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmi_CSVPath = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmi_Exit = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmi_Users = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmi_Login = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmi_ModifyPassword = new System.Windows.Forms.ToolStripMenuItem();
             this.cb_LocalIP = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tb_RemoteIP = new System.Windows.Forms.TextBox();
@@ -53,39 +57,74 @@
             this.label7 = new System.Windows.Forms.Label();
             this.nud_CountPeriod = new System.Windows.Forms.NumericUpDown();
             this.label5 = new System.Windows.Forms.Label();
-            this.文件保存路径ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fbd_CSVSave = new System.Windows.Forms.FolderBrowserDialog();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.tssl_CSVPath = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tssl_UserLevel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tssl_Blank = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_ListenerPort)).BeginInit();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_CountPeriod)).BeginInit();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.文件ToolStripMenuItem});
+            this.tsmi_File,
+            this.tsmi_Users});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(595, 25);
             this.menuStrip1.TabIndex = 3;
             this.menuStrip1.Text = "menuStrip1";
             // 
-            // 文件ToolStripMenuItem
+            // tsmi_File
             // 
-            this.文件ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.文件保存路径ToolStripMenuItem,
-            this.exitToolStripMenuItem});
-            this.文件ToolStripMenuItem.Name = "文件ToolStripMenuItem";
-            this.文件ToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
-            this.文件ToolStripMenuItem.Text = "文件";
+            this.tsmi_File.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsmi_CSVPath,
+            this.tsmi_Exit});
+            this.tsmi_File.Name = "tsmi_File";
+            this.tsmi_File.Size = new System.Drawing.Size(44, 21);
+            this.tsmi_File.Text = "文件";
             // 
-            // exitToolStripMenuItem
+            // tsmi_CSVPath
             // 
-            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.exitToolStripMenuItem.Text = "退出";
+            this.tsmi_CSVPath.Name = "tsmi_CSVPath";
+            this.tsmi_CSVPath.Size = new System.Drawing.Size(152, 22);
+            this.tsmi_CSVPath.Text = "文件保存路径";
+            this.tsmi_CSVPath.Click += new System.EventHandler(this.tsmi_CSVPath_Click);
+            // 
+            // tsmi_Exit
+            // 
+            this.tsmi_Exit.Name = "tsmi_Exit";
+            this.tsmi_Exit.Size = new System.Drawing.Size(152, 22);
+            this.tsmi_Exit.Text = "退出";
+            // 
+            // tsmi_Users
+            // 
+            this.tsmi_Users.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsmi_Login,
+            this.tsmi_ModifyPassword});
+            this.tsmi_Users.Name = "tsmi_Users";
+            this.tsmi_Users.Size = new System.Drawing.Size(68, 21);
+            this.tsmi_Users.Text = "权限管理";
+            // 
+            // tsmi_Login
+            // 
+            this.tsmi_Login.Name = "tsmi_Login";
+            this.tsmi_Login.Size = new System.Drawing.Size(124, 22);
+            this.tsmi_Login.Text = "登陆";
+            this.tsmi_Login.Click += new System.EventHandler(this.tsmi_Login_Click);
+            // 
+            // tsmi_ModifyPassword
+            // 
+            this.tsmi_ModifyPassword.Name = "tsmi_ModifyPassword";
+            this.tsmi_ModifyPassword.Size = new System.Drawing.Size(124, 22);
+            this.tsmi_ModifyPassword.Text = "修改密码";
+            this.tsmi_ModifyPassword.Click += new System.EventHandler(this.tsmi_ModifyPassword_Click);
             // 
             // cb_LocalIP
             // 
@@ -313,22 +352,50 @@
             this.label5.TabIndex = 0;
             this.label5.Text = "计数周期";
             // 
-            // 文件保存路径ToolStripMenuItem
+            // statusStrip1
             // 
-            this.文件保存路径ToolStripMenuItem.Name = "文件保存路径ToolStripMenuItem";
-            this.文件保存路径ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.文件保存路径ToolStripMenuItem.Text = "文件保存路径";
-            this.文件保存路径ToolStripMenuItem.Click += new System.EventHandler(this.文件保存路径ToolStripMenuItem_Click);
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tssl_CSVPath,
+            this.tssl_UserLevel,
+            this.tssl_Blank});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 360);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(595, 26);
+            this.statusStrip1.TabIndex = 7;
+            this.statusStrip1.Text = "statusStrip1";
             // 
-            // Form1
+            // tssl_CSVPath
+            // 
+            this.tssl_CSVPath.Name = "tssl_CSVPath";
+            this.tssl_CSVPath.Size = new System.Drawing.Size(379, 21);
+            this.tssl_CSVPath.Spring = true;
+            this.tssl_CSVPath.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // tssl_UserLevel
+            // 
+            this.tssl_UserLevel.AutoSize = false;
+            this.tssl_UserLevel.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
+            this.tssl_UserLevel.Name = "tssl_UserLevel";
+            this.tssl_UserLevel.Size = new System.Drawing.Size(120, 21);
+            this.tssl_UserLevel.Text = "操作员";
+            // 
+            // tssl_Blank
+            // 
+            this.tssl_Blank.AutoSize = false;
+            this.tssl_Blank.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
+            this.tssl_Blank.Name = "tssl_Blank";
+            this.tssl_Blank.Size = new System.Drawing.Size(50, 21);
+            // 
+            // DecoderLog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(595, 386);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.menuStrip1);
-            this.Name = "Form1";
+            this.Name = "DecoderLog";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
@@ -339,6 +406,8 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_CountPeriod)).EndInit();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -347,8 +416,8 @@
         #endregion
 
         private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem 文件ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem tsmi_File;
+        private System.Windows.Forms.ToolStripMenuItem tsmi_Exit;
         private System.Windows.Forms.ComboBox cb_LocalIP;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.CheckBox cb_ListLoopback;
@@ -370,8 +439,15 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox tb_ValidateString;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.ToolStripMenuItem 文件保存路径ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem tsmi_CSVPath;
         private System.Windows.Forms.FolderBrowserDialog fbd_CSVSave;
+        private System.Windows.Forms.ToolStripMenuItem tsmi_Users;
+        private System.Windows.Forms.ToolStripMenuItem tsmi_Login;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel tssl_CSVPath;
+        private System.Windows.Forms.ToolStripStatusLabel tssl_UserLevel;
+        private System.Windows.Forms.ToolStripStatusLabel tssl_Blank;
+        private System.Windows.Forms.ToolStripMenuItem tsmi_ModifyPassword;
     }
 }
 
