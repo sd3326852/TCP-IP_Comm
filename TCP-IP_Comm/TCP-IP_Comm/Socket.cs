@@ -14,28 +14,26 @@ namespace TCP_IP_Comm
 
     class Socket
     {
-        private string _LocalIP = "127.0.0.1";
-        private string _RemoteIP = "127.0.0.1";
-        private ushort _WorkingPort = 3333;
-        private SocketMode _WorkingMode = SocketMode.Server;
+        private string serverIP = "127.0.0.1";
+        private int serverPort = 3333;
+        private SocketMode sMode = SocketMode.Server;
 
         public event RemoteConnectHandler ConnectionReceived;
         public event RemoteDataHandler DataReceived;
         public event RemoteDisconnectHandler ClientOff;
 
-        private System.Net.Sockets.Socket _Socket;
+        private System.Net.Sockets.Socket server;
         private List<System.Net.Sockets.Socket> Clients = new List<System.Net.Sockets.Socket>();
 
-        public Socket(string sIp, ushort sPort, SocketMode sMode)
+        public Socket(string sIp, int sPort, SocketMode sMode)
         {
-            this._LocalIP = sIp;
-            this._WorkingPort = sPort;
+            this.serverIP = sIp;
+            this.serverPort = sPort;
         }
         public Socket(SocketParam sParameter)
         {
-            this._LocalIP = sParameter.LocalIP;
-            this._WorkingPort = sParameter.Port;
-            this._WorkingMode = sParameter.SocketMode;
+            this.serverIP = sParameter.LocalIP;
+            this.serverPort = sParameter.Port;
         }
 
         /// <summary>
@@ -45,40 +43,38 @@ namespace TCP_IP_Comm
         {
             try
             {
-                if (null != _Socket) _Socket.Dispose();
-                _Socket = new System.Net.Sockets.Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                if (null != server) server.Dispose();
+                server = new System.Net.Sockets.Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 //允许多个socket访问本地同一个IP和端口号
-                _Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                IPAddress localIP = IPAddress.Parse(serverIP);
+                IPEndPoint ipl = new IPEndPoint(localIP, serverPort);
 
-                switch (this._WorkingMode)
+                server.Bind(ipl);
+                switch (this.sMode)
                 {
                     case SocketMode.Server:
-                        IPAddress localIP = IPAddress.Parse(_LocalIP);
-                        IPEndPoint ipl = new IPEndPoint(localIP, _WorkingPort);
-                        _Socket.Bind(ipl);
-                        _Socket.Listen(10);
-                        _Socket.BeginAccept(new AsyncCallback(_Accept), _Socket);
+                        server.Listen(10);
+                        server.BeginAccept(new AsyncCallback(_Accept), server);
                         break;
                     case SocketMode.Client:
-                        _Socket.Connect(new IPEndPoint(IPAddress.Parse(_RemoteIP), _WorkingPort));
-                        StateObject state = new StateObject();
-                        _Socket.BeginReceive(state.buffer, 0, StateObject.BufferSize, SocketFlags.None, new AsyncCallback(_OnReceive), state);
+
                         break;
                     default:
                         break;
                 }
             }
-            catch (Exception ex)
+            catch (SocketException ex)
             {
-                _Socket = null;
+                server = null;
                 //C_Error.WriteErrorLog("SeamTraking", ex);
-                throw;
+                throw ex;
             }
         }
 
         private void _Accept(IAsyncResult iar)
         {
-            if (_Socket == null) return;
+            if (server == null) return;
             System.Net.Sockets.Socket client = (System.Net.Sockets.Socket)iar.AsyncState;
             try
             {
@@ -87,7 +83,7 @@ namespace TCP_IP_Comm
                 state.workSocket = Clients[Clients.Count - 1];
                 ConnectionReceived(Clients[Clients.Count - 1]);
                 Clients[Clients.Count - 1].BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(_OnReceive), state);
-                _Socket.BeginAccept(new AsyncCallback(_Accept), client);
+                server.BeginAccept(new AsyncCallback(_Accept), client);
             }
             catch (Exception ex)
             {
@@ -100,7 +96,7 @@ namespace TCP_IP_Comm
         private void _OnReceive(IAsyncResult ar)
         {
             StateObject state = (StateObject)ar.AsyncState;
-            System.Net.Sockets.Socket handler = state.workSocket ?? this._Socket;
+            System.Net.Sockets.Socket handler = state.workSocket;
 
             try
             {
@@ -113,19 +109,8 @@ namespace TCP_IP_Comm
                 }
                 else
                 {
-                    switch (this._WorkingMode)
-                    {
-                        case SocketMode.Server:
-                            Clients.Remove(handler);
-                            ClientOff(handler);
-                            break;
-                        case SocketMode.Client:
-                            ClientOff(handler);
-                            break;
-                        default:
-                            break;
-                    }
-
+                    Clients.Remove(handler);
+                    ClientOff(handler);
                     try
                     {
                         handler.Shutdown(SocketShutdown.Both);
@@ -164,7 +149,7 @@ namespace TCP_IP_Comm
         /// </summary>
         public void Disconnect()
         {
-            if (_Socket != null)
+            if (server != null)
             {
                 foreach (System.Net.Sockets.Socket client in Clients)
                 {
@@ -188,7 +173,7 @@ namespace TCP_IP_Comm
                 }
                 Clients.Clear();
 
-                try { _Socket.Close(); }
+                try { server.Close(); }
                 catch (Exception) { return; }
             }
         }
@@ -197,7 +182,7 @@ namespace TCP_IP_Comm
         {
             public System.Net.Sockets.Socket workSocket = null;
             // Size of receive buffer.     
-            public const int BufferSize = 0x400;
+            public const int BufferSize = 0x500000;
             // Receive buffer.     
             public byte[] buffer = new byte[BufferSize];
         }
