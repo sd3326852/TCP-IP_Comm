@@ -269,8 +269,6 @@ namespace TCP_IP_Comm
 
             string sName = Directory.GetCurrentDirectory() + "\\SocketParam.xml";
 
-            //if (File.Exists(pName)) File.Delete(pName);
-
             FileStream fs = new FileStream(sName, FileMode.Create, FileAccess.ReadWrite);
             fs.Position = 0;
 
@@ -356,8 +354,6 @@ namespace TCP_IP_Comm
                 fs = File.Create(FilePath);
             else
                 fs = File.Open(FilePath, FileMode.Append, FileAccess.Write);
-
-            fs.Position = fs.Length;
 
             StreamWriter sw = new StreamWriter(fs);
             sw.WriteLine(CSV_Line);
