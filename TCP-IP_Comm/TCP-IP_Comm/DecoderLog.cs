@@ -20,8 +20,8 @@ namespace TCP_IP_Comm
     {
         SocketParam _SParams;
         DecoderParam _DParams;
-        Socket _TCPListener;
-        bool _Listening = false;
+        Socket _Socket;
+        bool _Connected = false;
         UserLevel _CurrentUser = UserLevel.Operator;
         WMI_VALUE _WmiValue = new WMI_VALUE();
 
@@ -45,43 +45,70 @@ namespace TCP_IP_Comm
             this.tb_RemoteIP.Text = this._SParams.RemoteIP ?? "";
             this.nud_ListenerPort.Value = this._SParams.Port;
             this.cb_ListLoopback.Checked = this._SParams.ListLoopback;
+            this.cb_AutoConnect.Checked = this._SParams.AutoConnect;
 
             //解码参数
             this.nud_CountPeriod.Value = this._DParams.CountPeriod;
             this.tb_ValidateString.Text = this._DParams.ValidateString ?? "";
             this.lbl_CurrentCount.Text = this._DParams.CurrentCount.ToString();
             this.tssl_CSVPath.Text = this._DParams.CSVSavingPath;
+            this.nud_PulseTime.Value = this._DParams.PulseTime;
 
-            this.cb_LocalIP.TextChanged += this.cb_ListenerIP_TextChanged;
-            this.cb_LocalIP.DropDown += this.cb_ListenerIP_DropDown;
+            this.cb_LocalIP.TextChanged += this.cb_LocalIP_TextChanged;
+            this.tb_RemoteIP.Validated += this.tb_RemoteIP_Validated;
+            this.cb_LocalIP.DropDown += this.cb_LocalIP_DropDown;
             this.nud_ListenerPort.ValueChanged += nud_ListenerPort_ValueChanged;
             this.cb_ListLoopback.CheckedChanged += cb_ListLoopback_CheckedChanged;
-            this.btn_StartListen.Click += btn_StartListen_Click;
+            this.cb_AutoConnect.CheckedChanged += cb_AutoConnect_CheckedChanged;
+            this.btn_Connect.Click += btn_Connect_Click;
             this.nud_CountPeriod.Maximum = uint.MaxValue;
+            this.nud_PulseTime.ValueChanged += nud_PulseTime_ValueChanged;
 
             uint ret = WmiInit(null, null, null, 0);
+
+            if (this._SParams.AutoConnect)
+                this.btn_Connect_Click(this.btn_Connect, new EventArgs());
         }
 
-        private void btn_StartListen_Click(object sender, EventArgs e)
+        private void nud_PulseTime_ValueChanged(object sender, EventArgs e)
+        {
+            NumericUpDown nud = sender as NumericUpDown;
+            this._DParams.PulseTime = Convert.ToUInt16(nud.Value);
+        }
+
+        private void cb_AutoConnect_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox cb = sender as CheckBox;
+
+            this._SParams.AutoConnect = cb.Checked;
+            this._SaveSocketParam();
+        }
+
+        private void btn_Connect_Click(object sender, EventArgs e)
         {
             Button btn = sender as Button;
 
-            if (!this._Listening)
+            if (!this._Connected)
             {
                 try
                 {
-                    _TCPListener = new Socket(this._SParams);
-                    _TCPListener.ConnectionReceived += new RemoteConnectHandler(RemEPArrived);
-                    _TCPListener.DataReceived += new RemoteDataHandler(RemDataReceived);
-                    _TCPListener.ClientOff += new RemoteDisconnectHandler(RemEPLeft);
-                    _TCPListener.Connect();
-                    _Listening = true;
+                    _Socket = new Socket(this._SParams);
+                    _Socket.ConnectionReceived += new RemoteConnectHandler(RemEPArrived);
+                    _Socket.DataReceived += new RemoteDataHandler(RemDataReceived);
+                    _Socket.ClientOff += new RemoteDisconnectHandler(RemEPLeft);
+                    _Socket.Connect();
+                    _Connected = true;
+                    btn.Text = "断开";
+
+                    if (this._CurrentUser == UserLevel.Operator)
+                        return;
+
                     cb_LocalIP.Enabled = false;
                     nud_ListenerPort.Enabled = false;
                     tb_RemoteIP.Enabled = false;
                     cb_SocketMode.Enabled = false;
                     tsmi_CSVPath.Enabled = false;
-                    btn.Text = "断开";
+
                 }
                 catch (Exception ex)
                 {
@@ -90,14 +117,18 @@ namespace TCP_IP_Comm
             }
             else
             {
-                _TCPListener.Disconnect();
-                _Listening = false;
+                _Socket.Disconnect();
+                _Connected = false;
+                btn.Text = "连接";
+
+                if (this._CurrentUser == UserLevel.Operator)
+                    return;
+
                 cb_LocalIP.Enabled = true;
                 nud_ListenerPort.Enabled = true;
                 tb_RemoteIP.Enabled = true;
                 cb_SocketMode.Enabled = true;
                 tsmi_CSVPath.Enabled = true;
-                btn.Text = "连接";
             }
         }
 
@@ -115,22 +146,22 @@ namespace TCP_IP_Comm
             _SaveSocketParam();
         }
 
-        private void cb_ListenerIP_TextChanged(object sender, EventArgs e)
+        private void cb_LocalIP_TextChanged(object sender, EventArgs e)
         {
             ComboBox cb = sender as ComboBox;
             if (!string.IsNullOrWhiteSpace(cb.Text))
                 this._SParams.LocalIP = cb.Text;
             else
             {
-                cb.TextChanged -= this.cb_ListenerIP_TextChanged;
+                cb.TextChanged -= this.cb_LocalIP_TextChanged;
                 cb.Text = this._SParams.LocalIP;
-                cb.TextChanged += this.cb_ListenerIP_TextChanged;
+                cb.TextChanged += this.cb_LocalIP_TextChanged;
                 return;
             }
             _SaveSocketParam();
         }
 
-        private void cb_ListenerIP_DropDown(object sender, EventArgs e)
+        private void cb_LocalIP_DropDown(object sender, EventArgs e)
         {
             ComboBox cbox = (ComboBox)sender;
             string s = cbox.Text;
@@ -159,7 +190,61 @@ namespace TCP_IP_Comm
         {
             this._DParams.CountPeriod = Convert.ToUInt32(this.nud_CountPeriod.Value);
             this._DParams.ValidateString = this.tb_ValidateString.Text;
+            this._DParams.PulseTime = Convert.ToUInt16(this.nud_PulseTime.Value);
             this._SaveDecoderParam();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            _LevelShift(UserLevel.Operator);
+        }
+
+        private void tsmi_CSVPath_Click(object sender, EventArgs e)
+        {
+            var result = fbd_CSVSave.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                this._DParams.CSVSavingPath = fbd_CSVSave.SelectedPath;
+                this._SaveDecoderParam();
+                this.tssl_CSVPath.Text = fbd_CSVSave.SelectedPath;
+            }
+        }
+
+        private void tsmi_Login_Click(object sender, EventArgs e)
+        {
+            DialogResult result = new LoginForm(this._DParams).ShowDialog(this);
+            switch (result)
+            {
+                case DialogResult.OK:
+                    _LevelShift(UserLevel.Supervisor);
+                    this.timer1.Interval = 10 * 60 * 1000;
+                    this.timer1.Start();
+                    break;
+                case DialogResult.Cancel:
+                    break;
+                case DialogResult.Yes:
+                    _LevelShift(UserLevel.Operator);
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        private void tsmi_ModifyPassword_Click(object sender, EventArgs e)
+        {
+            PwdModForm pmf = new PwdModForm(this._DParams);
+            DialogResult result = pmf.ShowDialog();
+
+            switch (result)
+            {
+                case DialogResult.OK:
+                    this._DParams.Password = pmf.NewPassword;
+                    this._SaveDecoderParam();
+                    break;
+                default:
+                    break;
+            }
         }
         #endregion
 
@@ -185,7 +270,16 @@ namespace TCP_IP_Comm
 
             //TODO , resolve code , DOut1(!Result)
             string csvPath = _DParams.CSVSavingPath + "\\" + DateTime.Today.ToString("yyyyMMdd") + ".csv";
-            _WriteCSV(csvPath, DateTime.Now.ToString("HH:mm:ss") + "," + strDecode);
+            try
+            {
+                _WriteCSV(csvPath, DateTime.Now.ToString("HH:mm:ss") + "," + strDecode);
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show(this, "保存文件失败，请确认文件保存路径可正常访问");
+                this.btn_Connect.PerformClick();
+                return;
+            }
             _UpdateIEIDIoState(1, strDecode == this._DParams.ValidateString, -1);
 
             this._DParams.CurrentCount++;
@@ -194,7 +288,7 @@ namespace TCP_IP_Comm
             {
                 //DOut0;
 
-                _UpdateIEIDIoState(0, true, 500);
+                _UpdateIEIDIoState(0, true, this._DParams.PulseTime);
             }
             this._DParams.CurrentCount %= this._DParams.CountPeriod;
         }
@@ -213,7 +307,8 @@ namespace TCP_IP_Comm
                     break;
                 case SocketMode.Client:
                     MessageBox.Show("服务端断开连接");
-                    this.btn_StartListen.PerformClick();
+                    if (this._Connected)
+                        this.btn_Connect_Click(this.btn_Connect, new EventArgs());
                     break;
                 default:
                     break;
@@ -373,15 +468,20 @@ namespace TCP_IP_Comm
             this.tssl_UserLevel.Text = User == UserLevel.Supervisor ? "管理员" : "操作员";
 
             this.tsmi_ModifyPassword.Enabled = User == UserLevel.Supervisor;
-            this.tb_RemoteIP.Enabled = User == UserLevel.Supervisor;
             this.tb_ValidateString.Enabled = User == UserLevel.Supervisor;
-            this.nud_ListenerPort.Enabled = User == UserLevel.Supervisor;
             this.nud_CountPeriod.Enabled = User == UserLevel.Supervisor;
-            this.btn_SetCount.Enabled = User == UserLevel.Supervisor;
-            this.btn_StartListen.Enabled = User == UserLevel.Supervisor;
+            this.btn_SetDecoderParam.Enabled = User == UserLevel.Supervisor;
+            this.btn_Connect.Enabled = User == UserLevel.Supervisor;
+            this.cb_ListLoopback.Enabled = User == UserLevel.Supervisor;
+            this.cb_AutoConnect.Enabled = User == UserLevel.Supervisor;
+
+            if (this._Connected)
+                return;
+
+            this.nud_ListenerPort.Enabled = User == UserLevel.Supervisor;
+            this.tb_RemoteIP.Enabled = User == UserLevel.Supervisor;
             this.cb_LocalIP.Enabled = User == UserLevel.Supervisor;
             this.cb_SocketMode.Enabled = User == UserLevel.Supervisor;
-            this.cb_ListLoopback.Enabled = User == UserLevel.Supervisor;
         }
         #endregion
 
@@ -433,60 +533,8 @@ namespace TCP_IP_Comm
                 t.Start();
             }
         }
+
         #endregion
-
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            _LevelShift(UserLevel.Operator);
-        }
-
-        private void tsmi_CSVPath_Click(object sender, EventArgs e)
-        {
-            var result = fbd_CSVSave.ShowDialog();
-            if (result == DialogResult.OK)
-            {
-                this._DParams.CSVSavingPath = fbd_CSVSave.SelectedPath;
-                this._SaveDecoderParam();
-                this.tssl_CSVPath.Text = fbd_CSVSave.SelectedPath;
-            }
-        }
-
-        private void tsmi_Login_Click(object sender, EventArgs e)
-        {
-            DialogResult result = new LoginForm(this._DParams).ShowDialog(this);
-            switch (result)
-            {
-                case DialogResult.OK:
-                    _LevelShift(UserLevel.Supervisor);
-                    this.timer1.Interval = 10 * 60 * 1000;
-                    this.timer1.Start();
-                    break;
-                case DialogResult.Cancel:
-                    break;
-                case DialogResult.Yes:
-                    _LevelShift(UserLevel.Operator);
-                    break;
-                default:
-                    break;
-            }
-
-        }
-
-        private void tsmi_ModifyPassword_Click(object sender, EventArgs e)
-        {
-            PwdModForm pmf = new PwdModForm(this._DParams);
-            DialogResult result = pmf.ShowDialog();
-
-            switch (result)
-            {
-                case DialogResult.OK:
-                    this._DParams.Password = pmf.NewPassword;
-                    this._SaveDecoderParam();
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 
 
@@ -496,6 +544,7 @@ namespace TCP_IP_Comm
         public string RemoteIP;
         public ushort Port;
         public bool ListLoopback;
+        public bool AutoConnect;
         public SocketMode SocketMode;
     }
 
@@ -506,6 +555,7 @@ namespace TCP_IP_Comm
         public string ValidateString;
         public string CSVSavingPath;
         public string Password;
+        public ushort PulseTime;
     }
 
     enum UserLevel

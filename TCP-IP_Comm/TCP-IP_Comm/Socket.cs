@@ -188,7 +188,11 @@ namespace TCP_IP_Comm
                 }
                 Clients.Clear();
 
-                try { _Socket.Close(); }
+                try
+                {
+                    _Socket.Disconnect(true);
+                    _Socket.Close();
+                }
                 catch (Exception) { return; }
             }
         }

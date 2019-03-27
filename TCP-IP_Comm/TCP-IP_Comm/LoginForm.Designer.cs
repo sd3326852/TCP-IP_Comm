@@ -41,7 +41,7 @@
             this.btn_Login.Location = new System.Drawing.Point(55, 101);
             this.btn_Login.Name = "btn_Login";
             this.btn_Login.Size = new System.Drawing.Size(75, 23);
-            this.btn_Login.TabIndex = 0;
+            this.btn_Login.TabIndex = 2;
             this.btn_Login.Text = "登陆";
             this.btn_Login.UseVisualStyleBackColor = true;
             this.btn_Login.Click += new System.EventHandler(this.btn_Login_Click);
@@ -52,7 +52,7 @@
             this.btn_Cancel.Location = new System.Drawing.Point(176, 101);
             this.btn_Cancel.Name = "btn_Cancel";
             this.btn_Cancel.Size = new System.Drawing.Size(75, 23);
-            this.btn_Cancel.TabIndex = 1;
+            this.btn_Cancel.TabIndex = 3;
             this.btn_Cancel.Text = "取消";
             this.btn_Cancel.UseVisualStyleBackColor = true;
             this.btn_Cancel.Click += new System.EventHandler(this.btn_Cancel_Click);
@@ -75,7 +75,7 @@
             this.label2.TabIndex = 2;
             this.label2.Text = "密码";
             // 
-            // comboBox1
+            // cb_User
             // 
             this.cb_User.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cb_User.FormattingEnabled = true;
@@ -83,9 +83,9 @@
             "管理员",
             "操作员"});
             this.cb_User.Location = new System.Drawing.Point(96, 21);
-            this.cb_User.Name = "comboBox1";
+            this.cb_User.Name = "cb_User";
             this.cb_User.Size = new System.Drawing.Size(121, 20);
-            this.cb_User.TabIndex = 3;
+            this.cb_User.TabIndex = 1;
             // 
             // tb_Password
             // 
@@ -93,7 +93,7 @@
             this.tb_Password.Name = "tb_Password";
             this.tb_Password.PasswordChar = '*';
             this.tb_Password.Size = new System.Drawing.Size(121, 21);
-            this.tb_Password.TabIndex = 4;
+            this.tb_Password.TabIndex = 0;
             // 
             // LoginForm
             // 

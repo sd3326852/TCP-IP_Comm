@@ -38,8 +38,8 @@
             this.tsmi_ModifyPassword = new System.Windows.Forms.ToolStripMenuItem();
             this.cb_LocalIP = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.tb_RemoteIP = new System.Windows.Forms.TextBox();
-            this.btn_StartListen = new System.Windows.Forms.Button();
+            this.btn_Connect = new System.Windows.Forms.Button();
+            this.cb_AutoConnect = new System.Windows.Forms.CheckBox();
             this.cb_ListLoopback = new System.Windows.Forms.CheckBox();
             this.nud_ListenerPort = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
@@ -52,9 +52,11 @@
             this.tb_ValidateString = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.lbl_CurrentCount = new System.Windows.Forms.Label();
-            this.btn_SetCount = new System.Windows.Forms.Button();
+            this.btn_SetDecoderParam = new System.Windows.Forms.Button();
             this.btn_Reset = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
+            this.nud_PulseTime = new System.Windows.Forms.NumericUpDown();
+            this.label8 = new System.Windows.Forms.Label();
             this.nud_CountPeriod = new System.Windows.Forms.NumericUpDown();
             this.label5 = new System.Windows.Forms.Label();
             this.fbd_CSVSave = new System.Windows.Forms.FolderBrowserDialog();
@@ -62,10 +64,12 @@
             this.tssl_CSVPath = new System.Windows.Forms.ToolStripStatusLabel();
             this.tssl_UserLevel = new System.Windows.Forms.ToolStripStatusLabel();
             this.tssl_Blank = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tb_RemoteIP = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_ListenerPort)).BeginInit();
             this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nud_PulseTime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nud_CountPeriod)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -93,14 +97,14 @@
             // tsmi_CSVPath
             // 
             this.tsmi_CSVPath.Name = "tsmi_CSVPath";
-            this.tsmi_CSVPath.Size = new System.Drawing.Size(152, 22);
+            this.tsmi_CSVPath.Size = new System.Drawing.Size(148, 22);
             this.tsmi_CSVPath.Text = "文件保存路径";
             this.tsmi_CSVPath.Click += new System.EventHandler(this.tsmi_CSVPath_Click);
             // 
             // tsmi_Exit
             // 
             this.tsmi_Exit.Name = "tsmi_Exit";
-            this.tsmi_Exit.Size = new System.Drawing.Size(152, 22);
+            this.tsmi_Exit.Size = new System.Drawing.Size(148, 22);
             this.tsmi_Exit.Text = "退出";
             // 
             // tsmi_Users
@@ -138,7 +142,8 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.tb_RemoteIP);
-            this.groupBox1.Controls.Add(this.btn_StartListen);
+            this.groupBox1.Controls.Add(this.btn_Connect);
+            this.groupBox1.Controls.Add(this.cb_AutoConnect);
             this.groupBox1.Controls.Add(this.cb_ListLoopback);
             this.groupBox1.Controls.Add(this.nud_ListenerPort);
             this.groupBox1.Controls.Add(this.label2);
@@ -155,22 +160,24 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "连接参数";
             // 
-            // tb_RemoteIP
+            // btn_Connect
             // 
-            this.tb_RemoteIP.Location = new System.Drawing.Point(71, 46);
-            this.tb_RemoteIP.Name = "tb_RemoteIP";
-            this.tb_RemoteIP.Size = new System.Drawing.Size(130, 21);
-            this.tb_RemoteIP.TabIndex = 10;
-            this.tb_RemoteIP.Validated += new System.EventHandler(this.tb_RemoteIP_Validated);
+            this.btn_Connect.Location = new System.Drawing.Point(493, 18);
+            this.btn_Connect.Name = "btn_Connect";
+            this.btn_Connect.Size = new System.Drawing.Size(75, 23);
+            this.btn_Connect.TabIndex = 9;
+            this.btn_Connect.Text = "连接";
+            this.btn_Connect.UseVisualStyleBackColor = true;
             // 
-            // btn_StartListen
+            // cb_AutoConnect
             // 
-            this.btn_StartListen.Location = new System.Drawing.Point(493, 18);
-            this.btn_StartListen.Name = "btn_StartListen";
-            this.btn_StartListen.Size = new System.Drawing.Size(75, 23);
-            this.btn_StartListen.TabIndex = 9;
-            this.btn_StartListen.Text = "连接";
-            this.btn_StartListen.UseVisualStyleBackColor = true;
+            this.cb_AutoConnect.AutoSize = true;
+            this.cb_AutoConnect.Location = new System.Drawing.Point(393, 48);
+            this.cb_AutoConnect.Name = "cb_AutoConnect";
+            this.cb_AutoConnect.Size = new System.Drawing.Size(108, 16);
+            this.cb_AutoConnect.TabIndex = 8;
+            this.cb_AutoConnect.Text = "启动时自动连接";
+            this.cb_AutoConnect.UseVisualStyleBackColor = true;
             // 
             // cb_ListLoopback
             // 
@@ -253,9 +260,11 @@
             this.groupBox2.Controls.Add(this.tb_ValidateString);
             this.groupBox2.Controls.Add(this.label6);
             this.groupBox2.Controls.Add(this.lbl_CurrentCount);
-            this.groupBox2.Controls.Add(this.btn_SetCount);
+            this.groupBox2.Controls.Add(this.btn_SetDecoderParam);
             this.groupBox2.Controls.Add(this.btn_Reset);
             this.groupBox2.Controls.Add(this.label7);
+            this.groupBox2.Controls.Add(this.nud_PulseTime);
+            this.groupBox2.Controls.Add(this.label8);
             this.groupBox2.Controls.Add(this.nud_CountPeriod);
             this.groupBox2.Controls.Add(this.label5);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Top;
@@ -292,15 +301,15 @@
             this.lbl_CurrentCount.Text = "0";
             this.lbl_CurrentCount.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // btn_SetCount
+            // btn_SetDecoderParam
             // 
-            this.btn_SetCount.Location = new System.Drawing.Point(393, 21);
-            this.btn_SetCount.Name = "btn_SetCount";
-            this.btn_SetCount.Size = new System.Drawing.Size(75, 23);
-            this.btn_SetCount.TabIndex = 9;
-            this.btn_SetCount.Text = "应用设置";
-            this.btn_SetCount.UseVisualStyleBackColor = true;
-            this.btn_SetCount.Click += new System.EventHandler(this.btn_SetDecoderParam_Click);
+            this.btn_SetDecoderParam.Location = new System.Drawing.Point(393, 21);
+            this.btn_SetDecoderParam.Name = "btn_SetDecoderParam";
+            this.btn_SetDecoderParam.Size = new System.Drawing.Size(75, 23);
+            this.btn_SetDecoderParam.TabIndex = 9;
+            this.btn_SetDecoderParam.Text = "应用设置";
+            this.btn_SetDecoderParam.UseVisualStyleBackColor = true;
+            this.btn_SetDecoderParam.Click += new System.EventHandler(this.btn_SetDecoderParam_Click);
             // 
             // btn_Reset
             // 
@@ -319,6 +328,33 @@
             this.label7.Size = new System.Drawing.Size(65, 12);
             this.label7.TabIndex = 3;
             this.label7.Text = "当前计数：";
+            // 
+            // nud_PulseTime
+            // 
+            this.nud_PulseTime.Location = new System.Drawing.Point(272, 51);
+            this.nud_PulseTime.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.nud_PulseTime.Name = "nud_PulseTime";
+            this.nud_PulseTime.Size = new System.Drawing.Size(92, 21);
+            this.nud_PulseTime.TabIndex = 1;
+            this.nud_PulseTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.nud_PulseTime.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(213, 53);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(53, 12);
+            this.label8.TabIndex = 0;
+            this.label8.Text = "脉冲时间";
             // 
             // nud_CountPeriod
             // 
@@ -358,7 +394,7 @@
             this.tssl_CSVPath,
             this.tssl_UserLevel,
             this.tssl_Blank});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 360);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 427);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(595, 26);
             this.statusStrip1.TabIndex = 7;
@@ -367,7 +403,7 @@
             // tssl_CSVPath
             // 
             this.tssl_CSVPath.Name = "tssl_CSVPath";
-            this.tssl_CSVPath.Size = new System.Drawing.Size(379, 21);
+            this.tssl_CSVPath.Size = new System.Drawing.Size(410, 21);
             this.tssl_CSVPath.Spring = true;
             this.tssl_CSVPath.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -386,11 +422,18 @@
             this.tssl_Blank.Name = "tssl_Blank";
             this.tssl_Blank.Size = new System.Drawing.Size(50, 21);
             // 
+            // tb_RemoteIP
+            // 
+            this.tb_RemoteIP.Location = new System.Drawing.Point(71, 46);
+            this.tb_RemoteIP.Name = "tb_RemoteIP";
+            this.tb_RemoteIP.Size = new System.Drawing.Size(130, 21);
+            this.tb_RemoteIP.TabIndex = 10;
+            // 
             // DecoderLog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(595, 386);
+            this.ClientSize = new System.Drawing.Size(595, 453);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -405,6 +448,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.nud_ListenerPort)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nud_PulseTime)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nud_CountPeriod)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
@@ -424,15 +468,14 @@
         private System.Windows.Forms.NumericUpDown nud_ListenerPort;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button btn_StartListen;
+        private System.Windows.Forms.Button btn_Connect;
         private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.TextBox tb_RemoteIP;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox cb_SocketMode;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Label lbl_CurrentCount;
-        private System.Windows.Forms.Button btn_SetCount;
+        private System.Windows.Forms.Button btn_SetDecoderParam;
         private System.Windows.Forms.Button btn_Reset;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.NumericUpDown nud_CountPeriod;
@@ -448,6 +491,10 @@
         private System.Windows.Forms.ToolStripStatusLabel tssl_UserLevel;
         private System.Windows.Forms.ToolStripStatusLabel tssl_Blank;
         private System.Windows.Forms.ToolStripMenuItem tsmi_ModifyPassword;
+        private System.Windows.Forms.CheckBox cb_AutoConnect;
+        private System.Windows.Forms.NumericUpDown nud_PulseTime;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.TextBox tb_RemoteIP;
     }
 }
 
