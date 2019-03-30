@@ -53,21 +53,35 @@ namespace TCP_IP_Comm
             this.lbl_CurrentCount.Text = this._DParams.CurrentCount.ToString();
             this.tssl_CSVPath.Text = this._DParams.CSVSavingPath;
             this.nud_PulseTime.Value = this._DParams.PulseTime;
+            this.cb_ReverseResult.Checked = this._DParams.ReverseResult;
+            this.cb_ReversePeriod.Checked = this._DParams.ReversePeriod;
 
             this.cb_LocalIP.TextChanged += this.cb_LocalIP_TextChanged;
             this.tb_RemoteIP.Validated += this.tb_RemoteIP_Validated;
             this.cb_LocalIP.DropDown += this.cb_LocalIP_DropDown;
+            this.cb_SocketMode.SelectedIndexChanged += cb_SocketMode_SelectedIndexChanged;
             this.nud_ListenerPort.ValueChanged += nud_ListenerPort_ValueChanged;
             this.cb_ListLoopback.CheckedChanged += cb_ListLoopback_CheckedChanged;
             this.cb_AutoConnect.CheckedChanged += cb_AutoConnect_CheckedChanged;
             this.btn_Connect.Click += btn_Connect_Click;
             this.nud_CountPeriod.Maximum = uint.MaxValue;
             this.nud_PulseTime.ValueChanged += nud_PulseTime_ValueChanged;
+            this.btn_SetDecoderParam.Click += btn_SetDecoderParam_Click;
+            this.tsmi_About.Click += tsmi_About_Click;
+            this.tsmi_CSVPath.Click += tsmi_CSVPath_Click;
+            this.tsmi_Exit.Click += tsmi_Exit_Click;
+            this.tsmi_Login.Click += tsmi_Login_Click;
+            this.tsmi_ModifyPassword.Click += tsmi_ModifyPassword_Click;
 
             uint ret = WmiInit(null, null, null, 0);
 
             if (this._SParams.AutoConnect)
                 this.btn_Connect_Click(this.btn_Connect, new EventArgs());
+        }
+
+        private void tsmi_Exit_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
 
         private void nud_PulseTime_ValueChanged(object sender, EventArgs e)
@@ -191,6 +205,8 @@ namespace TCP_IP_Comm
             this._DParams.CountPeriod = Convert.ToUInt32(this.nud_CountPeriod.Value);
             this._DParams.ValidateString = this.tb_ValidateString.Text;
             this._DParams.PulseTime = Convert.ToUInt16(this.nud_PulseTime.Value);
+            this._DParams.ReverseResult = this.cb_ReverseResult.Checked;
+            this._DParams.ReversePeriod = this.cb_ReversePeriod.Checked;
             this._SaveDecoderParam();
         }
 
@@ -246,6 +262,11 @@ namespace TCP_IP_Comm
                     break;
             }
         }
+
+        private void tsmi_About_Click(object sender, EventArgs e)
+        {
+            new AboutForm().ShowDialog();
+        }
         #endregion
 
         #region Socket响应
@@ -280,7 +301,8 @@ namespace TCP_IP_Comm
                 this.btn_Connect.PerformClick();
                 return;
             }
-            _UpdateIEIDIoState(1, strDecode == this._DParams.ValidateString, -1);
+
+            _UpdateIEIDIoState(1, (strDecode != this._DParams.ValidateString) ^ this._DParams.ReverseResult, this._DParams.PulseTime);
 
             this._DParams.CurrentCount++;
             this.lbl_CurrentCount.Text = this._DParams.CurrentCount.ToString();
@@ -288,7 +310,7 @@ namespace TCP_IP_Comm
             {
                 //DOut0;
 
-                _UpdateIEIDIoState(0, true, this._DParams.PulseTime);
+                _UpdateIEIDIoState(0, true ^ this._DParams.ReversePeriod, this._DParams.PulseTime);
             }
             this._DParams.CurrentCount %= this._DParams.CountPeriod;
         }
@@ -474,6 +496,9 @@ namespace TCP_IP_Comm
             this.btn_Connect.Enabled = User == UserLevel.Supervisor;
             this.cb_ListLoopback.Enabled = User == UserLevel.Supervisor;
             this.cb_AutoConnect.Enabled = User == UserLevel.Supervisor;
+            this.cb_ReverseResult.Enabled = User == UserLevel.Supervisor;
+            this.cb_ReversePeriod.Enabled = User == UserLevel.Supervisor;
+            this.nud_PulseTime.Enabled = User == UserLevel.Supervisor;
 
             if (this._Connected)
                 return;
@@ -522,19 +547,24 @@ namespace TCP_IP_Comm
                 t.Interval = Math.Max(50, delay);
                 t.Elapsed += delegate
                 {
-                    t.Stop();
-                    t.Dispose();
-                    value = !value;
-                    DioValue &= ~((uint)(0x1 << index));
-                    DioValue |= Convert.ToUInt32(value) << index;
-                    DioValue |= (1 << 24);
-                    SetDIOWMI(DioValue, ref _WmiValue);
+                    this.Invoke(new MethodInvoker(() =>
+                    {
+                        t.Stop();
+                        t.Dispose();
+                        value = !value;
+                        DioValue &= ~((uint)(0x1 << index));
+                        DioValue |= Convert.ToUInt32(value) << index;
+                        DioValue |= (1 << 24);
+                        uint ret = SetDIOWMI(DioValue, ref _WmiValue);
+
+                    }));
                 };
                 t.Start();
             }
         }
 
         #endregion
+
     }
 
 
@@ -556,6 +586,8 @@ namespace TCP_IP_Comm
         public string CSVSavingPath;
         public string Password;
         public ushort PulseTime;
+        public bool ReverseResult;
+        public bool ReversePeriod;
     }
 
     enum UserLevel
