@@ -34,6 +34,7 @@ namespace TCP_IP_Comm
         public Socket(SocketParam sParameter)
         {
             this._LocalIP = sParameter.LocalIP;
+            this._RemoteIP = sParameter.RemoteIP;
             this._WorkingPort = sParameter.Port;
             this._WorkingMode = sParameter.SocketMode;
         }
