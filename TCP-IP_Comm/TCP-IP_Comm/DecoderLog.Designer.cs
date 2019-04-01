@@ -69,6 +69,8 @@
             this.tssl_CSVPath = new System.Windows.Forms.ToolStripStatusLabel();
             this.tssl_UserLevel = new System.Windows.Forms.ToolStripStatusLabel();
             this.tssl_Blank = new System.Windows.Forms.ToolStripStatusLabel();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.sfDataGrid1 = new Syncfusion.WinForms.DataGrid.SfDataGrid();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_ListenerPort)).BeginInit();
@@ -76,6 +78,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.nud_PulseTime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nud_CountPeriod)).BeginInit();
             this.statusStrip1.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.sfDataGrid1)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -297,7 +301,7 @@
             this.groupBox2.Size = new System.Drawing.Size(605, 118);
             this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "计数状态";
+            this.groupBox2.Text = "计数参数";
             // 
             // tb_ValidateString
             // 
@@ -465,11 +469,40 @@
             this.tssl_Blank.Name = "tssl_Blank";
             this.tssl_Blank.Size = new System.Drawing.Size(50, 21);
             // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.sfDataGrid1);
+            this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox3.Location = new System.Drawing.Point(0, 224);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(605, 242);
+            this.groupBox3.TabIndex = 8;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "groupBox3";
+            // 
+            // sfDataGrid1
+            // 
+            this.sfDataGrid1.AccessibleName = "Table";
+            this.sfDataGrid1.AllowEditing = false;
+            this.sfDataGrid1.AllowResizingColumns = true;
+            this.sfDataGrid1.AllowTriStateSorting = true;
+            this.sfDataGrid1.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.LastColumnFill;
+            this.sfDataGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.sfDataGrid1.Location = new System.Drawing.Point(3, 17);
+            this.sfDataGrid1.Name = "sfDataGrid1";
+            this.sfDataGrid1.NavigationMode = Syncfusion.WinForms.DataGrid.Enums.NavigationMode.Row;
+            this.sfDataGrid1.RowHeight = 22;
+            this.sfDataGrid1.ShowRowHeader = true;
+            this.sfDataGrid1.Size = new System.Drawing.Size(599, 222);
+            this.sfDataGrid1.TabIndex = 0;
+            this.sfDataGrid1.Text = "sfDataGrid1";
+            // 
             // DecoderLog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(605, 492);
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -488,6 +521,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.nud_CountPeriod)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.sfDataGrid1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -535,6 +570,8 @@
         private System.Windows.Forms.ToolStripMenuItem tsmi_About;
         private System.Windows.Forms.CheckBox cb_ReversePeriod;
         private System.Windows.Forms.CheckBox cb_ReverseResult;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private Syncfusion.WinForms.DataGrid.SfDataGrid sfDataGrid1;
     }
 }
 
