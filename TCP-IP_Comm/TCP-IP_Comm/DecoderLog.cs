@@ -38,11 +38,11 @@ namespace TCP_IP_Comm
             _Records = new BindingList<DecodeRecord>();
 
             sfDataGrid1.DataSource = _Records;
-            var col = sfDataGrid1.Columns[0] as GridDateTimeColumn;
+            GridDateTimeColumn col = sfDataGrid1.Columns[0] as GridDateTimeColumn;
             col.Format = "yyyy-MM-dd , HH:mm:ss";
             col.Width = 150;
 
-            _LevelShift(this._CurrentUser);
+            _LevelShift(_CurrentUser);
 
             //TCP参数
             cb_LocalIP.Items.Add(_SParams.LocalIP ?? "");
@@ -84,7 +84,7 @@ namespace TCP_IP_Comm
             uint ret = WmiInit(null, null, null, 0);
 
             if (_SParams.AutoConnect)
-                this.btn_Connect_Click(btn_Connect, new EventArgs());
+                btn_Connect_Click(btn_Connect, new EventArgs());
         }
 
         private void btn_Reset_Click(object sender, EventArgs e)
@@ -228,11 +228,11 @@ namespace TCP_IP_Comm
 
         private void btn_SetDecoderParam_Click(object sender, EventArgs e)
         {
-            _DParams.CountPeriod = Convert.ToUInt32(this.nud_CountPeriod.Value);
-            _DParams.ValidateString = this.tb_ValidateString.Text;
-            _DParams.PulseTime = Convert.ToUInt16(this.nud_PulseTime.Value);
-            _DParams.ReverseResult = this.cb_ReverseResult.Checked;
-            _DParams.ReversePeriod = this.cb_ReversePeriod.Checked;
+            _DParams.CountPeriod = Convert.ToUInt32(nud_CountPeriod.Value);
+            _DParams.ValidateString = tb_ValidateString.Text;
+            _DParams.PulseTime = Convert.ToUInt16(nud_PulseTime.Value);
+            _DParams.ReverseResult = cb_ReverseResult.Checked;
+            _DParams.ReversePeriod = cb_ReversePeriod.Checked;
             _SaveDecoderParam();
         }
 
@@ -243,7 +243,7 @@ namespace TCP_IP_Comm
 
         private void tsmi_CSVPath_Click(object sender, EventArgs e)
         {
-            var result = fbd_CSVSave.ShowDialog();
+            DialogResult result = fbd_CSVSave.ShowDialog();
             if (result == DialogResult.OK)
             {
                 _DParams.CSVSavingPath = fbd_CSVSave.SelectedPath;
@@ -254,7 +254,7 @@ namespace TCP_IP_Comm
 
         private void tsmi_Login_Click(object sender, EventArgs e)
         {
-            DialogResult result = new LoginForm(this._DParams).ShowDialog(this);
+            DialogResult result = new LoginForm(_DParams).ShowDialog(this);
             switch (result)
             {
                 case DialogResult.OK:
@@ -425,7 +425,7 @@ namespace TCP_IP_Comm
 
             try
             {
-                xs.Serialize(fs, this._SParams);
+                xs.Serialize(fs, _SParams);
             }
             catch (Exception ex)
             {
@@ -453,7 +453,7 @@ namespace TCP_IP_Comm
 
             try
             {
-                xs.Serialize(fs, this._DParams);
+                xs.Serialize(fs, _DParams);
             }
             catch (Exception ex)
             {
@@ -556,6 +556,7 @@ namespace TCP_IP_Comm
         [DllImport("ismmSDK_x86.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern UInt32 SetDIOWMI(UInt32 DIO_Value, ref WMI_VALUE pWMI_VALUE);
 
+        System.Timers.Timer[] t = new System.Timers.Timer[4];
         private void _UpdateIEIDIoState(int index, bool value, int delay)
         {
             UInt32 DioValue = 0;
@@ -568,15 +569,15 @@ namespace TCP_IP_Comm
 
             if (delay >= 0)
             {
-                System.Timers.Timer t = new System.Timers.Timer();
-                t.AutoReset = false;
-                t.Interval = Math.Max(50, delay);
-                t.Elapsed += delegate
+                t[index] = new System.Timers.Timer();
+                t[index].AutoReset = false;
+                t[index].Interval = Math.Max(50, delay);
+                t[index].Elapsed += delegate
                 {
                     this.Invoke(new MethodInvoker(() =>
                     {
-                        t.Stop();
-                        t.Dispose();
+                        t[index].Stop();
+                        t[index].Dispose();
                         value = !value;
                         DioValue &= ~((uint)(0x1 << index));
                         DioValue |= Convert.ToUInt32(value) << index;
@@ -585,7 +586,7 @@ namespace TCP_IP_Comm
 
                     }));
                 };
-                t.Start();
+                t[index].Start();
             }
         }
 
@@ -628,9 +629,9 @@ namespace TCP_IP_Comm
 
         public static string EncryptDES(string encryptString, string key)
         {
-            var input = encoding.GetBytes(encryptString);
-            var ouptputData = ProcessDES(input, key, true);
-            var outputStr = Convert.ToBase64String(ouptputData);
+            byte[] input = encoding.GetBytes(encryptString);
+            byte[] ouptputData = ProcessDES(input, key, true);
+            string outputStr = Convert.ToBase64String(ouptputData);
 
             //base64编码中有不能作为文件名的'/'符号，这里把它替换一下，增强适用范围
             return outputStr.Replace('/', '@');
@@ -640,23 +641,23 @@ namespace TCP_IP_Comm
         {
             decryptString = decryptString.Replace('@', '/');
 
-            var input = Convert.FromBase64String(decryptString);
-            var data = ProcessDES(input, key, false);
+            byte[] input = Convert.FromBase64String(decryptString);
+            byte[] data = ProcessDES(input, key, false);
             return encoding.GetString(data);
         }
 
 
         private static byte[] ProcessDES(byte[] data, string key, bool isEncrypt)
         {
-            using (var dCSP = new DESCryptoServiceProvider())
+            using (DESCryptoServiceProvider dCSP = new DESCryptoServiceProvider())
             {
-                var keyData = Md5(key);
-                var rgbKey = new ArraySegment<byte>(keyData, 0, 8).ToArray();
-                var rgbIV = new ArraySegment<byte>(keyData, 8, 8).ToArray();
-                var dCSPKey = isEncrypt ? dCSP.CreateEncryptor(rgbKey, rgbIV) : dCSP.CreateDecryptor(rgbKey, rgbIV);
+                byte[] keyData = Md5(key);
+                byte[] rgbKey = new ArraySegment<byte>(keyData, 0, 8).ToArray();
+                byte[] rgbIV = new ArraySegment<byte>(keyData, 8, 8).ToArray();
+                ICryptoTransform dCSPKey = isEncrypt ? dCSP.CreateEncryptor(rgbKey, rgbIV) : dCSP.CreateDecryptor(rgbKey, rgbIV);
 
-                using (var memory = new MemoryStream())
-                using (var cStream = new CryptoStream(memory, dCSPKey, CryptoStreamMode.Write))
+                using (MemoryStream memory = new MemoryStream())
+                using (CryptoStream cStream = new CryptoStream(memory, dCSPKey, CryptoStreamMode.Write))
                 {
                     cStream.Write(data, 0, data.Length);
                     cStream.FlushFinalBlock();
@@ -667,7 +668,7 @@ namespace TCP_IP_Comm
 
         public static byte[] Md5(string str)
         {
-            using (var md5 = MD5.Create())
+            using (MD5 md5 = MD5.Create())
             {
                 return md5.ComputeHash(Encoding.UTF8.GetBytes(str));
             }

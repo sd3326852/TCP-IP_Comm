@@ -478,7 +478,7 @@
             this.groupBox3.Size = new System.Drawing.Size(605, 242);
             this.groupBox3.TabIndex = 8;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "groupBox3";
+            this.groupBox3.Text = "历史记录";
             // 
             // sfDataGrid1
             // 
@@ -508,7 +508,7 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.menuStrip1);
             this.Name = "DecoderLog";
-            this.Text = "Form1";
+            this.Text = "记录器";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
