@@ -12,7 +12,7 @@ namespace TCP_IP_Comm
     public delegate void RemoteDataHandler(System.Net.Sockets.Socket RemSoc, byte[] buffer, int Length);
     public delegate void RemoteDisconnectHandler(System.Net.Sockets.Socket RemSoc);
 
-    class Socket
+    class ConvenientSocket
     {
         private string _LocalIP = "127.0.0.1";
         private string _RemoteIP = "127.0.0.1";
@@ -26,7 +26,7 @@ namespace TCP_IP_Comm
         private System.Net.Sockets.Socket _Socket;
         private List<System.Net.Sockets.Socket> Clients = new List<System.Net.Sockets.Socket>();
 
-        public Socket(string sIp, ushort sPort, SocketMode sMode)
+        public ConvenientSocket(string sIp, ushort sPort, SocketMode sMode)
         {
             this._LocalIP = sIp;
             this._WorkingPort = sPort;
@@ -86,7 +86,7 @@ namespace TCP_IP_Comm
                 Clients.Add(client.EndAccept(iar));
                 StateObject state = new StateObject();
                 state.workSocket = Clients[Clients.Count - 1];
-                ConnectionReceived(Clients[Clients.Count - 1]);
+                ConnectionReceived?.Invoke(Clients[Clients.Count - 1]);
                 Clients[Clients.Count - 1].BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(_OnReceive), state);
                 _Socket.BeginAccept(new AsyncCallback(_Accept), client);
             }
@@ -110,7 +110,7 @@ namespace TCP_IP_Comm
 
                 if (bytes > 0)
                 {
-                    DataReceived(state.workSocket, state.buffer, bytes);
+                    DataReceived?.Invoke(state.workSocket, state.buffer, bytes);
                 }
                 else
                 {
@@ -118,10 +118,10 @@ namespace TCP_IP_Comm
                     {
                         case SocketMode.Server:
                             Clients.Remove(handler);
-                            ClientOff(handler);
+                            ClientOff?.Invoke(handler);
                             break;
                         case SocketMode.Client:
-                            ClientOff(handler);
+                            ClientOff?.Invoke(handler);
                             break;
                         default:
                             break;
@@ -151,7 +151,7 @@ namespace TCP_IP_Comm
                 if (ex is SocketException)
                 {
                     Clients.Remove(handler);
-                    ClientOff(handler);
+                    ClientOff?.Invoke(handler);
                     return;
                 }
                 //C_Error.WriteErrorLog("DamperData", ex);
